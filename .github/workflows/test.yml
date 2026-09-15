@@ -1,0 +1,40 @@
+name: UI自动化测试
+
+# 触发条件：push代码时自动跑 + 支持手动点按钮跑
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 第1步：把代码拉到服务器上
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      # 第2步：装 Python
+      - name: 安装Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # 第3步：装项目依赖
+      - name: 安装依赖
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium
+
+      # 第4步：跑测试（headless模式，CI服务器没有显示器）
+      - name: 运行pytest
+        run: pytest tests/ --html=report.html --tracing retain-on-failure
+
+      # 第5步：保存报告（不管成功失败都保存）
+      - name: 上传测试报告
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 测试报告
+          path: report.html
