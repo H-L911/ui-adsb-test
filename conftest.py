@@ -1,4 +1,4 @@
-from _pyrepl import pager
+
 
 import pytest
 from playwright.sync_api import Page
